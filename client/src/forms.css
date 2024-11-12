@@ -1,0 +1,138 @@
+
+
+.container{
+    max-width: 700px;
+    width: 100%;
+    background-color: #fff;
+    padding: 25px 30px;
+    border-radius: 5px;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+}
+.container .naslov{
+    font-size: 25px;
+    font-weight: 500;
+    position: relative;
+}
+.kupac-info{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin: 20px 0 12px 0;
+}
+.input{
+    margin-bottom: 15px;
+    width: calc(100% / 2 - 20px);
+}
+.details{
+    display: block;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.kupac-info .input input,select,textarea{
+    height: 45px;
+    width: 100%;
+    outline: none;
+    font-size: 16px;
+    border-radius: 5px;
+    padding-left: 15px;
+    border: 1px solid #ccc;
+    border-bottom-width: 2px;
+    transition: all 0.3s ease;
+}
+.opis{
+    outline: none;
+    font-size: 16px;
+    border-radius: 5px;
+    padding-left: 15px;
+    border: 1px solid #ccc;
+    border-bottom-width: 2px;
+    transition: all 0.3s ease;
+}
+.najdraze-naslov{
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.kategorije{
+    display: flex;
+    width: 80%;
+    margin: 14px 0 ;
+    justify-content: space-between;
+}
+
+.kategorije label{
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.tacka{
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    margin-right: 10px;
+    background: #d9d9d9;
+    border: 5px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.button{
+    height: 45px;
+    margin: 35px 0
+}
+
+
+
+.button input{
+    height: 100%;
+    width: 100%;
+    border-radius: 5px;
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: #088178;
+}
+.button input:hover{
+    /* transform: scale(0.99); */
+    background: linear-gradient(-135deg, #71b7e6, #9b59b6);
+}
+
+.txt-button{
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.txt-button:hover{
+   color: #088178;
+}
+
+@media(max-width: 584px){
+    .container{
+        max-width: 100%;
+    }
+    form .kupac-info .input{
+        margin-bottom: 15px;
+        width: 100%;
+    }
+    form .kategorije{
+        width: 100%;
+    }
+    .content form .kupac-info{
+        max-height: 300px;
+        overflow-y: scroll;
+    }
+    .kupac-info::-webkit-scrollbar{
+        width: 5px;
+    }
+}
+
+@media(max-width: 459px){
+    .container .content .kategorija{
+        flex-direction: column;
+    }
+}
