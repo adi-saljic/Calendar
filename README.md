@@ -26,9 +26,9 @@ This web application allows patients to easily book appointments with physiother
 
 ## Installation and Setup
 1. Clone the repository.
-2. Run `npm install` to install dependencies.
+2. Run `npm install` on server and client to install dependencies.
 3. Set up the PostgreSQL database and configure the connection in the backend.
-4. Run `npm start` to start the application.
+4. Run `npm start` on server and client to start the application.
 
 The application will be available at `localhost:3000`.
 
