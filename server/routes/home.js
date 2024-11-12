@@ -29,36 +29,21 @@ let query = {
 },
 }
 
-const createToken = (email) => {
-    return jwt.sign({email},"adminSecret",{
-      expiresIn: 2 * 60 * 60
-    })
-  }
+
 
 const transporter = nodemailer.createTransport({
     service: 'Gmail', // Use the email service you prefer
     auth: {
       user: 'adi.saljic.as@gmail.com', // Your email address
-      pass: 'evjf peiv fjth naqj' // Your email password or application-specific password
+      pass: 'lpnk luhq lagj gial' // Your email password or application-specific password
     }
   });
 
-  const auth = (req,res,next) => {
-    const token = req.cookies?.adm;
-    console.log("Token auth ", req.cookies)
-    if(token){
-      jwt.verify(token,"adminSecret",(err,decodedToken) => {
-        if(err){
-          console.log(err.message);
-          res.sendStatus(403)
-        } else{
-          next();
-        }
-      });
-    }else{
-        res.sendStatus(403)
-    }
-  }
+const createToken = (id) => {
+    return jwt.sign({id}, "3n0g@J2sh3K0nj@B!j3l0g2!", {
+        expiresIn: 8 * 60 * 60
+    })
+}
 
 router.get('/', query.termini,function(req,res,next){
     res.json({termini:req.termini})
@@ -76,16 +61,10 @@ router.post('/admin/logged', function (req,res){
             admin = result.rows[0];
             console.log(admin);
             if(req.body.email === admin.email &&  bcrypt.compareSync(req.body.password, admin.password)){
-                req.session.user = result;
+                const token = createToken(req.body.admin);
+                res.cookie('jwt', token,{ httpOnly: true, maxAge: 8*60*60*1000 })
                 res.sendStatus(200);
-                if (res.headersSent) {
-                    console.log('Cookie has been set');
-                    // If you see this message, it means the cookie has been successfully set.
-                } else {
-                    console.log('Cookie was not set');
-                    // If you see this message, it means there was an issue setting the cookie.
-                }
-                //res.sendStatus(200);
+
 
             }else {
                 res.sendStatus(403);
@@ -96,8 +75,14 @@ router.post('/admin/logged', function (req,res){
     })
   });
 
+  router.post('/admin/logout', function (req,res){
+        res.cookie('jwt', '' , {maxAge : 1});
+        res.sendStatus(200);
+
+  });
+
   router.get('/admin' ,query.termini,function(req,res,next){
-    if(req.session.user){
+    if(req.cookies.jwt){
         res.json({termini:req.termini})
     }
     else{
@@ -111,8 +96,8 @@ router.post('/admin/logged', function (req,res){
 router.post('/spasi',function(req,res,next){
     console.log(req.body)
     let data = req.body;
-    pool.query(`INSERT INTO termini (datum, vrijeme, ime, prezime, broj_telefona, email, komentar,vrsta_pregleda)
-                VALUES ($1, $2, $3, $4, $5, $6, $7,$8); `,[data.date, data.hour, data.name, data.lastname, data.phone, data.email, data.comments,data.selectedOption] ,(err, result) => {
+    pool.query(`INSERT INTO termini (datum, vrijeme, ime, prezime, broj_telefona, email, komentar,vrsta_pregleda, zakljucen)
+                VALUES ($1, $2, $3, $4, $5, $6, $7,$8, $9); `,[data.date, data.hour, data.name, data.lastname, data.phone, data.email, data.comments,data.selectedOption, data.zakljucen] ,(err, result) => {
         if(err){
             console.log(err);
         }else{
@@ -159,7 +144,7 @@ router.post('/update/:id', function(req,res,next){
                 comments : req.body.comments === '' ? result.rows[0].komentar : req.body.comments,
                 selectedOption : req.body.selectedOption === '' ? result.rows[0].vrsta_pregleda : req.body.selectedOption,
             }
-                pool.query(`UPDATE termini SET  ime = $1, prezime = $2, broj_telefona = $3, email = $4, komentar = $5 ,vrsta_pregleda = $6
+                pool.query(`UPDATE termini SET  ime = $1, prezime = $2, broj_telefona = $3, email = $4, komentar = $5 ,vrsta_pregleda = $6, zakljucen = 'Da'
                             WHERE id = $7 `,[ data.name, data.lastname, data.phone, data.email, data.comments,data.selectedOption,id] ,(err, result) => {
                     if(err){
                         console.log(err);
@@ -173,6 +158,82 @@ router.post('/update/:id', function(req,res,next){
     
     
 })
+
+
+router.post('/admin/delete/:id', function(req,res,next){
+    let id = req.params.id;
+    const str = `delete from termini where id =` + id + `;`
+    console.log(str);
+    
+    pool.query(str, (err, result) => {
+        if(err){
+            console.log(" ERROR ERROR  ", err);
+        }else{
+            res.sendStatus(200);
+                
+        }
+    });
+    
+    
+})
+
+
+router.post('/message',function(req,res,next){
+    let data = req.body;
+    pool.query(`INSERT INTO poruke (datum, ime, prezime, broj_telefona, email, poruka)
+                VALUES ($1, $2, $3, $4, $5, $6); `,[new Date(),data.name, data.lastname, data.phone, data.email, data.comments] ,(err, result) => {
+        if(err){
+            console.log(err);
+        }else{
+
+            const mailOptions = {
+                from: 'adi.saljic.as@gmail.com',
+                to: 'adi.saljic.as@gmail.com', // Replace with your email address
+                subject: 'KONTAKT PORUKA',
+                text: `Ime i prezime: ${data.name} ${data.lastname}\n Broj telefona: ${data.phone}\nEmail: ${data.email}\nPoruka:\n${data.comments}`,
+                priority: 'high'
+            };
+        
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                  console.error(error);
+                  res.status(500).send('Email could not be sent.');
+                } else {
+                  console.log('Email sent: ' + info.response);
+                  res.status(200).send('Email sent successfully.');
+                }
+              });
+
+            res.sendStatus(200);
+        }
+    });
+    
+})
+
+router.post('/search',function(req,res,next){
+    let data = req.body.searchValue.split(' ').filter(str => str !== '');
+    let queryString =  `select * from termini where `
+    if(data.length === 1){
+        queryString += ` lower(ime) = lower('` +data[0] +`') or lower(prezime) = lower('` + data[0] +`')`;
+    }
+    else {
+        queryString += ` (lower(ime) = lower('` +data[0] +`') and lower(prezime) = lower('` + data[1] +`')) or (lower(ime) = lower('` +data[1] +`') and lower(prezime) = lower('` + data[0] +`'))`;
+    }
+
+    pool.query(queryString, (err, result) => {
+        if(err){
+            console.log(" ERROR ERROR  ", err);
+        }else{
+            console.log(result.rows)
+            res.json({searchOutput: result.rows})
+                
+        }
+    });
+    
+})
+
+
+
 
 
   
